@@ -4,7 +4,7 @@ class Services::CreateCsvWithParams
   PRODUCT_STRUCTURE = {
     fid: 'Параметр: fid',
     sku: 'Артикул',
-    title: 'Название товара',
+    title: 'Название товара или услуги',
     sdesc: 'Краткое описание',
     desc: 'Полное описание',
     price: 'Цена продажи',
@@ -13,14 +13,15 @@ class Services::CreateCsvWithParams
     pict: 'Изображения',
     p4: 'Размещение на сайте',
     link: 'Параметр: OLDLINK',
-    cat: 'Подкатегория 1',
-    cat1: 'Подкатегория 2',
-    cat2: 'Подкатегория 3',
-    cat3: 'Подкатегория 4',
-    cat4: 'Подкатегория 5',
+    cat: 'Корневая',
+    cat1: 'Подкатегория 1',
+    cat2: 'Подкатегория 2',
+    cat3: 'Подкатегория 3',
+    cat4: 'Подкатегория 4',
     mtitle: 'Тег title',
     mdesc: 'Мета-тег description',
-    mkeyw: 'Мета-тег keywords'
+    mkeyw: 'Мета-тег keywords',
+    # option1: "Свойство: Вариант",
   }.freeze
 
     def self.call
@@ -129,7 +130,7 @@ class Services::CreateCsvWithParams
           if vel.p1.present? # Вид записи должен быть типа - "Длина рамы: 20 --- Ширина рамы: 30"
             vel.p1.split('---').each do |vp|
               key = 'Параметр: '+vp.split(':')[0].strip
-              value = vp.split(':')[1].remove('.') if vp.split(':')[1] !=nil
+              value = vp.split(':')[1] if vp.split(':')[1] !=nil
               row[key] = value
             end
           end
