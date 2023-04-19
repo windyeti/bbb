@@ -1,8 +1,7 @@
 namespace :p do
 
-  # what string special for commit
-  # require 'capybara/dsl'
-  # include Capybara::DSL
+  require 'capybara/dsl'
+  include Capybara::DSL
 
   task t: :environment do
     link = "https://www.greenfactory.su/#!/Stabilizirovanny-mokh/c/111922251"
