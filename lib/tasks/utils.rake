@@ -132,6 +132,21 @@ namespace :parsing do
     title
   end
 
+  def get_category_name(name, category_path_parent)
+    category = Category.find_by(category_path: "#{category_path_parent}/#{name}")
+    category_path_parent
+
+    if category.present?
+      count = 1
+      loop do
+        name = "#{name.gsub(/__\d+$/,'')}__#{count}"
+        break if Category.find_by(category_path: "#{category_path_parent}/#{name}").nil?
+        count += 1
+      end
+    end
+    name
+  end
+
   def get_skus(doc)
     skus = doc.css('select.select.offers-select option').map do |option|
       fid = option['value']

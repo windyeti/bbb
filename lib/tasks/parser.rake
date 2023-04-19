@@ -71,7 +71,7 @@ Category.find_by(category_path: category_path_name).update(amount: product_urls.
 
       # vars = Services::GetVars.new(doc).call
 
-      title = doc.at('h1.product-single__title').text.strip
+      title = get_title(doc.at('h1.product-single__title').text.strip)
 
       sku = doc.at('h1.product-single__title').text.strip rescue nil
 
