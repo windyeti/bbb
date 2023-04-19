@@ -1,7 +1,6 @@
 namespace :p do
 
   # what string special for commit
-  #
   # require 'capybara/dsl'
   # include Capybara::DSL
 
