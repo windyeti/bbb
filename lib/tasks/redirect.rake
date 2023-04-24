@@ -8,6 +8,86 @@ namespace :redirect do
     end
   end
 
+  task redirect_xlsx: :environment do
+    id_prop_OLDLINK = get_id_oldlink
+    book = Spreadsheet::Workbook.new
+    sheet = book.create_workssheet(name: "redirect")
+    count = 0
+    loop do
+      response = api_get_products(page)
+      body = JSON.parse(response.body)
+      p body.size
+      break if body.size == 0
+      page += 1
+      body.each do |product|
+        newlink = "https://#{Rails.application.credentials[:shop][:domain]}/product/" + product["permalink"]
+        oldlink = product["characteristics"].find {|char| char["property_id"] == id_prop_OLDLINK}
+        oldlink = oldlink.nil? ? nil : oldlink["title"]
+        if oldlink.present?
+          sheet.row(count) << oldlink, newlink
+          count += 1
+        end
+      end
+    end
+  end
+
+  task redirect_csv: :environment do
+    products = []
+    page = 1
+    id_prop_OLDLINK = get_id_oldlink
+
+    CSV.open("#{Rails.public_path}/short_redir.csv", "a+") do |csv|
+      loop do
+        response = api_get_products(page)
+        body = JSON.parse(response.body)
+        p body.size
+        break if body.size == 0
+        page += 1
+        body.each do |product|
+          newlink = "https://#{Rails.application.credentials[:shop][:domain]}/product/" + product["permalink"]
+          oldlink = product["characteristics"].find {|char| char["property_id"] == id_prop_OLDLINK}
+          oldlink = oldlink.nil? ? nil : oldlink["title"]
+          csv << [oldlink, newlink] if oldlink.present?
+        end
+      end
+    end
+  end
+
+  def get_id_oldlink
+    page_for_find_OLDLINK = 1
+    loop do
+      response = api_get_products(page_for_find_OLDLINK)
+      body = JSON.parse(response.body)
+      break if body.size == 0
+      body.each do |product|
+        pp product['properties']
+        prop = product['properties'].find {|prop| prop["title"] == "OLDLINK"}
+        id_prop_OLDLINK = prop["id"] if prop.present?
+        break
+      end
+      break if id_prop_OLDLINK.present?
+      page_for_find_OLDLINK += 1
+    end
+
+    if id_prop_OLDLINK.nil?
+      p "НЕТ Параметра OLDLINK"
+      next
+    else
+      p "Параметр OLDLINK #{id_prop_OLDLINK}"
+    end
+    id_prop_OLDLINK
+  end
+
+  def api_get_products(page)
+    api_key = Rails.application.credentials[:shop][:api_key]
+    password = Rails.application.credentials[:shop][:password]
+    domain = Rails.application.credentials[:shop][:domain]
+
+    url_api_category = "http://#{api_key}:#{password}@#{domain}/admin/products.json?per_page=100&page=#{page}"
+
+    RestClient.get( url_api_category )
+  end
+
   task destroy: :environment do
     redirects = []
     page = 1

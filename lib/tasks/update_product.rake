@@ -21,50 +21,6 @@ namespace :parsing do
     end
   end
 
-  task redirect: :environment do
-    products = []
-    page = 1
-    page_for_find_OLDLINK = 1
-    id_prop_OLDLINK = nil
-    loop do
-      response = api_get_products(page_for_find_OLDLINK)
-      body = JSON.parse(response.body)
-      break if body.size == 0
-      body.each do |product|
-        pp product['properties']
-        prop = product['properties'].find {|prop| prop["title"] == "OLDLINK"}
-        id_prop_OLDLINK = prop["id"] if prop.present?
-        break
-      end
-      break if id_prop_OLDLINK.present?
-      page_for_find_OLDLINK += 1
-    end
-
-    if id_prop_OLDLINK.nil?
-      p "НЕТ Параметра OLDLINK"
-      next
-    else
-      p "Параметр OLDLINK #{id_prop_OLDLINK}"
-    end
-
-    CSV.open("#{Rails.public_path}/short_redir.csv", "a+") do |csv|
-      loop do
-        response = api_get_products(page)
-        body = JSON.parse(response.body)
-        p body.size
-        body.each do |product|
-          newlink = "https://#{Rails.application.credentials[:shop][:domain]}/product/" + product["permalink"]
-          oldlink = product["characteristics"].find {|char| char["property_id"] == id_prop_OLDLINK}
-          oldlink = oldlink.nil? ? nil : oldlink["title"]
-          csv << [oldlink, newlink] if oldlink.present?
-        end
-        break if body.size == 0
-        products += body
-        page += 1
-      end
-    end
-  end
-
   def api_get_products(page)
     api_key = Rails.application.credentials[:shop][:api_key]
     password = Rails.application.credentials[:shop][:password]
