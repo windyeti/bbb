@@ -24,10 +24,11 @@ namespace :redirect do
         oldlink = product["characteristics"].find {|char| char["property_id"] == id_prop_OLDLINK}
         oldlink = oldlink.nil? ? nil : oldlink["title"]
         if oldlink.present?
-          sheet.row(count) << oldlink, newlink
+          sheet.row(count).push(oldlink, newlink)
           count += 1
         end
       end
+      book.write 'short_redir.xls'
     end
   end
 
@@ -71,7 +72,7 @@ namespace :redirect do
 
     if id_prop_OLDLINK.nil?
       p "НЕТ Параметра OLDLINK"
-      next
+      return nil
     else
       p "Параметр OLDLINK #{id_prop_OLDLINK}"
     end
