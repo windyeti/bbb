@@ -1,42 +1,27 @@
 namespace :client do
   task create: :environment do
-    already_id = []
     rows = CSV.read("#{Rails.public_path}/shop.csv", headers: true)
     rows.each do |row|
-      fid = row["Параметр: fid"]
-      id = row["ID товара"]
-      tov = Tov.find_by(fid: fid)
-      unless already_id.include?(tov.id)
-        tov.reviews.each {|client| api_create_client(client, id)}
-        already_id << tov.id
-      end
+      datd = {
+      "client": {
+        name: row["Имя"].present? ? row["Имя"] : "Unknown",
+        surname: "Unknown",
+        middlename: "Unknown",
+        registered: true,
+        email: row["Email / Телефон"],
+        password: row["Email / Телефон"],
+        type: "Client::Individual",
+      }
+    }
+      api_create_client(data)
     end
 
   end
 
-  def api_create_client(client, id)
+  def api_create_client(client)
     api_key = Rails.application.credentials[:shop][:api_key]
     password = Rails.application.credentials[:shop][:password]
     domain = Rails.application.credentials[:shop][:domain]
-
-    p data = {
-      client: {
-        name: client[:name],
-        surname: client[:surname],
-        middlename: client[:middlename],
-        registered: true,
-        email: client[:email],
-        "password": "123456",
-        "phone": "+71111111111",
-        "type": "Client::Individual",
-        "fields_values_attributes": [
-          {
-            "field_id": 183,
-            "value": "text"
-          }
-        ]
-      }
-    }
 
     url_api_category = "http://#{api_key}:#{password}@#{domain}/admin/clients.json"
 
