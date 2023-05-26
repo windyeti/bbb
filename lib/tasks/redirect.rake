@@ -11,8 +11,9 @@ namespace :redirect do
   task redirect_xlsx: :environment do
     id_prop_OLDLINK = get_id_oldlink
     book = Spreadsheet::Workbook.new
-    sheet = book.create_workssheet(name: "redirect")
+    sheet = book.create_worksheet(name: "redirect")
     count = 0
+    page = 1
     loop do
       response = api_get_products(page)
       body = JSON.parse(response.body)
@@ -28,8 +29,8 @@ namespace :redirect do
           count += 1
         end
       end
-      book.write 'short_redir.xls'
     end
+    book.write "#{Rails.public_path}/short_redir.xls"
   end
 
   task redirect_csv: :environment do
@@ -56,27 +57,24 @@ namespace :redirect do
 
   def get_id_oldlink
     page_for_find_OLDLINK = 1
+    id_prop_OLDLINK = nil
     loop do
       response = api_get_products(page_for_find_OLDLINK)
       body = JSON.parse(response.body)
-      break if body.size == 0
+      if body.size == 0
+        p "НЕТ Параметра OLDLINK"
+        return nil
+      end
       body.each do |product|
         pp product['properties']
-        prop = product['properties'].find {|prop| prop["title"] == "OLDLINK"}
-        id_prop_OLDLINK = prop["id"] if prop.present?
-        break
+        p prop = product['properties'].find {|prop| prop["title"] == "OLDLINK"}
+        p id_prop_OLDLINK = prop["id"] if prop.present?
+        if id_prop_OLDLINK.present?
+          return id_prop_OLDLINK
+        end
       end
-      break if id_prop_OLDLINK.present?
       page_for_find_OLDLINK += 1
     end
-
-    if id_prop_OLDLINK.nil?
-      p "НЕТ Параметра OLDLINK"
-      return nil
-    else
-      p "Параметр OLDLINK #{id_prop_OLDLINK}"
-    end
-    id_prop_OLDLINK
   end
 
   def api_get_products(page)

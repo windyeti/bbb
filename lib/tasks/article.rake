@@ -17,7 +17,7 @@ namespace :article do
     CSV.open("#{Rails.public_path}/redir_news.csv", "a+") do |csv|
       Article.all.each do |article|
         article_url = article.article_url
-        insales_link = "https://myshop-bvw692.myinsales.ru#{article.insales_link}"
+        insales_link = "https://#{article.insales_link}"
         csv << [article_url, insales_link]
       end
     end
